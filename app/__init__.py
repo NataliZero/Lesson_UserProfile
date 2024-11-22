@@ -1,21 +1,18 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from config import Config
 
-db = SQLAlchemy()  # Инициализация базы данных
-login = LoginManager()  # Инициализация Flask-Login
-login.login_view = 'login'  # Страница входа, если пользователь не авторизован
+# Инициализация приложения
+app = Flask(__name__)
+app.config.from_object(Config)
 
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(Config)  # Конфигурация приложения
+# Инициализация расширений
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'  # Указываем, какой маршрут использовать для логина, если пользователь не авторизован
 
-    db.init_app(app)  # Инициализация базы данных с приложением
-    login.init_app(app)  # Инициализация Flask-Login с приложением
-
-    with app.app_context():
-        from app.routes import init_routes  # Импортируем функцию регистрации маршрутов
-        init_routes(app)  # Регистрируем маршруты
-
-    return app
+# Импорт маршрутов после инициализации приложения
+from app import routes

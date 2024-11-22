@@ -1,46 +1,31 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from app.models import User
-from flask_login import current_user, login_required
 
-# Форма редактирования профиля
-class EditProfileForm(FlaskForm):
-    username = StringField('Имя пользователя', validators=[DataRequired()])
-    email = StringField('Электронная почта', validators=[DataRequired(), Email()])
-    password = PasswordField('Новый пароль', validators=[EqualTo('confirm', message='Пароли должны совпадать')])
-    confirm = PasswordField('Подтверждение нового пароля')
-    submit = SubmitField('Обновить профиль')
+# Форма регистрации
+class RegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Sign Up')
 
+    # Валидатор для проверки уникальности имени пользователя
     def validate_username(self, username):
-        if username.data != current_user.username:
-            user = User.query.filter_by(username=username.data).first()
-            if user is not None:
-                raise ValidationError('Пользователь с таким именем уже существует.')
+        user = User.query.filter_by(username=username.data).first()
+        if user:
+            raise ValidationError('Это имя уже занято.')
 
+    # Валидатор для проверки уникальности email
     def validate_email(self, email):
-        if email.data != current_user.email:
-            user = User.query.filter_by(email=email.data).first()
-            if user is not None:
-                raise ValidationError('Пользователь с таким адресом электронной почты уже существует.')
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError('Этот email уже зарегистрирован.')
 
-    def validate_password(self, password):
-        if len(password) > 50:
-            raise ValidationError("Слишком длинная строка для пароля.")
-
-    def validate_confirm(self, confirm):
-        if len(confirm) > 50:
-            raise ValidationError("Слишком длинная строка для подтверждения пароля.")
-
-    def prefill_form(self):
-        self.username.data = current_user.username
-        self.email.data = current_user.email
-        self.password.data = current_user.password
-        self.confirm.data = current_user.password
-
-
-# Форма входа
+# Форма логина
 class LoginForm(FlaskForm):
-    email = StringField('Электронная почта', validators=[DataRequired(), Email()])
-    password = PasswordField('Пароль', validators=[DataRequired()])
-    submit = SubmitField('Войти')
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember = BooleanField('Remember Me')
+    submit = SubmitField('Login')
