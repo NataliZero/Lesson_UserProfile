@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block content %}
+<h1>Register</h1>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    <div>{{ form.username.label }} {{ form.username }}</div>
+    <div>{{ form.email.label }} {{ form.email }}</div>
+    <div>{{ form.password.label }} {{ form.password }}</div>
+    <div>{{ form.confirm_password.label }} {{ form.confirm_password }}</div>
+    <button type="submit">{{ form.submit.label }}</button>
+</form>
+{% endblock %}
+l>
